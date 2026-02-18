@@ -1,4 +1,4 @@
-# disguise-feedback
+# Disguise Notes Feedback
 
 A Bitfocus Companion module for disguise that pulls tracks notes data via the Transport API.
 
