@@ -1,6 +1,6 @@
 # disguise-feedback
 
-A Bitfocus Companion module for disguise that pulls session data via the Web API.
+A Bitfocus Companion module for disguise that pulls tracks data via the Transport API.
 
 ## Features
 - **Health Polling**: Automatic reconnection logic with status updates.
