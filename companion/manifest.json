@@ -1,0 +1,26 @@
+{
+	"id": "disguise-feedback",
+	"name": "disguise-feedback",
+	"shortname": "disguise-feedback",
+	"description": "Disguise Notes Feedback",
+	"version": "1.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-disguise-feedback.git",
+	"bugs": "https://github.com/bitfocus/companion-module-disguise-feedback/issues",
+	"maintainers": [
+		{
+			"name": "Aleksei Vlasov",
+			"email": "snapfiles@icloud.com"
+		}
+	],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../src/main.js"
+	},
+	"legacyIds": [],
+	"manufacturer": "Disguise",
+	"products": ["Disguise - Notes Feedback"],
+	"keywords": ["Media Server", "D3", "Disguise"]
+}
