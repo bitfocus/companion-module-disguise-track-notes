@@ -4,7 +4,7 @@ A Bitfocus Companion module for disguise that pulls tracks notes data via the Tr
 
 ## Features
 - **Health Polling**: Automatic reconnection logic with status updates.
-- **Dynamic Variables**: Pulls all track notes and cues into a single JSON variable.
+- **Dynamic Variable**: Pulls all track notes and cues into a single JSON variable.
 - **Advanced Feedback**: Dynamically updates button text based on specific Cue notes.
 
 ## Configuration

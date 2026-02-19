@@ -1,7 +1,7 @@
 {
 	"name": "disguise-feedback",
 	"version": "1.0.0",
-	"main": "src/main.js",
+	"main": "main.js",
 	"scripts": {
 		"format": "prettier -w .",
 		"package": "companion-module-build"
