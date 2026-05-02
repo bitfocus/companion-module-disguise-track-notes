@@ -85,6 +85,37 @@ class ModuleInstance extends InstanceBase {
 		}, this.config.interval || 5000)
 	}
 
+	async fetchProjectFps(signal) {
+		const url = `http://${this.config.host}:${this.config.port}/api/session/python/execute`
+		// Network errors are NOT caught here — they propagate to checkConnection()'s
+		// catch block so the status is correctly set to Disconnected.
+		const res = await fetch(url, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ script: 'return(state.globalRefreshRate)' }),
+			signal,
+		})
+		if (!res.ok) return 25
+		try {
+			const data = await res.json()
+			const refreshRate = JSON.parse(data.returnValue).asDouble
+			return refreshRate <= 30 ? refreshRate : refreshRate / 2
+		} catch {
+			return 25
+		}
+	}
+
+	secondsToTimecode(seconds, fps) {
+		const totalFrames = Math.round(seconds * fps)
+		const frames = totalFrames % fps
+		const totalSecs = Math.floor(totalFrames / fps)
+		const secs = totalSecs % 60
+		const mins = Math.floor(totalSecs / 60) % 60
+		const hours = Math.floor(totalSecs / 3600)
+		const pad = (n) => String(Math.floor(n)).padStart(2, '0')
+		return `${pad(hours)}:${pad(mins)}:${pad(secs)}:${pad(frames)}`
+	}
+
 	stopPolling() {
 		if (this.pollTimer) {
 			clearInterval(this.pollTimer)
@@ -98,6 +129,8 @@ class ModuleInstance extends InstanceBase {
 		const timeoutId = setTimeout(() => controller.abort(), 5000)
 
 		try {
+			this.projectFps = await this.fetchProjectFps(controller.signal)
+
 			// 1. Get the list of tracks
 			const trackRes = await fetch(`${baseUrl}/tracks`, { signal: controller.signal })
 			if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`)
@@ -121,7 +154,7 @@ class ModuleInstance extends InstanceBase {
 						const tags = annotations.tags || []
 						const notesArray = annotations.notes || []
 
-						// Create a lookup map for notes: { "15": "test 1", "30": "test 2" }
+						// Create a lookup map for notes: { 15: "note 1", 20: "note 2" }
 						const notesLookup = {}
 						notesArray.forEach(note => {
 							if (note.time !== undefined) {
@@ -129,15 +162,23 @@ class ModuleInstance extends InstanceBase {
 							}
 						})
 
-						// Build an object for this track: { "CUE 2.1": "test 1", "CUE 2.2": "test 2" }
 						let trackCues = {}
-						
+						const matchedTimes = new Set()
+
+						// CUE-matched notes use "CUE X" as key
 						tags.forEach(tag => {
 							if (tag.type === 'CUE') {
 								const cueName = `CUE ${tag.value}`
-								// Find the note text that matches this tag's time
-								const noteText = notesLookup[tag.time] || ""
-								trackCues[cueName] = noteText
+								trackCues[cueName] = notesLookup[tag.time] || ""
+								matchedTimes.add(tag.time)
+							}
+						})
+
+						// Remaining notes use "HH:MM:SS:FF" timecode as key
+						notesArray.forEach(note => {
+							if (note.time !== undefined && !matchedTimes.has(note.time)) {
+								const tc = this.secondsToTimecode(note.time, this.projectFps)
+								trackCues[tc] = note.text || ""
 							}
 						})
 
