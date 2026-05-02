@@ -1,12 +1,12 @@
 {
-	"id": "disguise-feedback",
-	"name": "disguise-feedback",
-	"shortname": "disguise-feedback",
-	"description": "Disguise Notes Feedback",
+	"id": "disguise-track-notes",
+	"name": "disguise-track-notes",
+	"shortname": "disguise-track-notes",
+	"description": "Disguise Track Notes",
 	"version": "1.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-disguise-feedback.git",
-	"bugs": "https://github.com/bitfocus/companion-module-disguise-feedback/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-disguise-track-notes.git",
+	"bugs": "https://github.com/bitfocus/companion-module-disguise-track-notes/issues",
 	"maintainers": [
 		{
 			"name": "Aleksei Vlasov",
@@ -21,6 +21,6 @@
 	},
 	"legacyIds": [],
 	"manufacturer": "Disguise",
-	"products": ["Disguise - Notes Feedback"],
+	"products": ["Track Notes"],
 	"keywords": ["Media Server", "D3", "Disguise"]
 }
