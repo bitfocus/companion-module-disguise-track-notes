@@ -76,10 +76,12 @@ class ModuleInstance extends InstanceBase {
 			return
 		}
 
-		// Initial check immediately
+		this.lastStatus = null
+		this.updateStatus(InstanceStatus.Connecting)
+		this.log('info', `Connecting to ${this.config.host}:${this.config.port}`)
+
 		this.checkConnection()
 
-		// Setup Interval based on config
 		this.pollTimer = setInterval(() => {
 			this.checkConnection()
 		}, this.config.interval || 5000)
@@ -121,27 +123,32 @@ class ModuleInstance extends InstanceBase {
 			clearInterval(this.pollTimer)
 			delete this.pollTimer
 		}
+		if (this.activeController) {
+			this.activeController.abort('config_change')
+			delete this.activeController
+		}
 	}
 
 	async checkConnection() {
-		const baseUrl = `http://${this.config.host}:${this.config.port}/api/session/transport`
+		if (this.activeController) this.activeController.abort('superseded')
+
 		const controller = new AbortController()
-		const timeoutId = setTimeout(() => controller.abort(), 5000)
+		this.activeController = controller
+		const timeoutId = setTimeout(() => controller.abort('timeout'), 5000)
 
 		try {
 			this.projectFps = await this.fetchProjectFps(controller.signal)
 
-			// 1. Get the list of tracks
+			const baseUrl = `http://${this.config.host}:${this.config.port}/api/session/transport`
+
 			const trackRes = await fetch(`${baseUrl}/tracks`, { signal: controller.signal })
 			if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`)
-			
+
 			const trackData = await trackRes.json()
 			const tracks = trackData.result || []
 
 			let trackNotesMap = {}
 
-			// 2. Loop through each track to get its specific annotations
-			// 2. Loop through each track to get its specific annotations
 			for (const track of tracks) {
 				try {
 					const noteRes = await fetch(`${baseUrl}/annotations?uid=${track.uid}`, { 
@@ -187,12 +194,12 @@ class ModuleInstance extends InstanceBase {
 						trackNotesMap[track.name] = {}
 					}
 				} catch (e) {
+					if (e.name === 'AbortError') throw e
 					this.log('debug', `Error processing track ${track.name}: ${e.message}`)
 					trackNotesMap[track.name] = {}
 				}
 			}
 
-			// 4. Update the Companion variable
 			this.setVariableValues({
 				track_notes: JSON.stringify(trackNotesMap)
 			})
@@ -202,16 +209,22 @@ class ModuleInstance extends InstanceBase {
 			if (this.lastStatus !== InstanceStatus.Ok) {
 				this.updateStatus(InstanceStatus.Ok)
 				this.lastStatus = InstanceStatus.Ok
+				this.log('info', `Connected to ${this.config.host}:${this.config.port}`)
 			}
 
 		} catch (error) {
+			const reason = controller.signal.reason
+			if (reason === 'config_change' || reason === 'superseded') return
+
+			const msg = reason === 'timeout' ? 'Connection timeout' : error.message
 			if (this.lastStatus !== InstanceStatus.Disconnected) {
-				this.updateStatus(InstanceStatus.Disconnected, 'Data Fetch Error')
-				this.log('error', `Update failed: ${error.message}`)
+				this.updateStatus(InstanceStatus.Disconnected, msg)
 				this.lastStatus = InstanceStatus.Disconnected
+				this.log('warn', `Disconnected from ${this.config.host}:${this.config.port}: ${msg}`)
 			}
 		} finally {
 			clearTimeout(timeoutId)
+			if (this.activeController === controller) delete this.activeController
 		}
 	}
 
