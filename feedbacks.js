@@ -17,7 +17,7 @@ module.exports = function (self) {
 					type: 'textinput',
 					id: 'cue',
 					label: 'Note Position (e.g. CUE 2.1 or 00:00:01:15)',
-					default: 'CUE 1.0',
+					default: 'CUE 1',
 				},
 			],
 			callback: async (feedback) => {
