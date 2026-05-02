@@ -4,8 +4,8 @@ module.exports = function (self) {
 	self.setFeedbackDefinitions({
 		cue_text_to_button: {
 			type: 'advanced',
-			name: 'Update Button Text with Cue Note',
-			description: 'Sets the button text to the note found in the track_notes JSON',
+			name: 'Update Button Text from Track Note',
+			description: 'Sets the button text to the note for a given track. Use a CUE name (e.g. CUE 2.1) or a timecode (e.g. 00:00:01:15) as the Note Position.',
 			options: [
 				{
 					type: 'textinput',
@@ -16,7 +16,7 @@ module.exports = function (self) {
 				{
 					type: 'textinput',
 					id: 'cue',
-					label: 'Cue Name (e.g. CUE 2.1)',
+					label: 'Note Position (e.g. CUE 2.1 or 00:00:01:15)',
 					default: 'CUE 1.0',
 				},
 			],
