@@ -8,7 +8,7 @@ A Bitfocus Companion module that pulls track notes from a disguise project via t
 |-----------------|---------------|---------------------------------------------|
 | Target IP       | 192.168.0.10  | IP address of the disguise machine          |
 | Target Port     | 80            | HTTP port of the disguise API               |
-| Update Interval | 5000ms        | How often to poll for changes (100–60000ms) |
+| Update Interval | 5000ms        | How often to poll for changes (100-60000ms) |
 
 ## Variable
 
